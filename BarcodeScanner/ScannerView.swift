@@ -9,6 +9,8 @@ import SwiftUI
 
 struct ScannerView: UIViewControllerRepresentable {
     
+    @Binding var scannedBarcode: String
+    
     func makeUIViewController(context: Context) -> ScannerVC {
         ScannerVC(scannerDelegate: context.coordinator)
     }
@@ -18,15 +20,21 @@ struct ScannerView: UIViewControllerRepresentable {
     }
     
     func makeCoordinator() -> Coordinator {
-        return Coordinator()
+        return Coordinator(scannerView: self)
     }
     
     // UIViewController talks to Coordinator and Coordinator
     // talks to SwiftUI View.
     final class Coordinator: NSObject, ScannerVCDelegate {
         
+        private let scannerView: ScannerView
+        
+        init(scannerView: ScannerView) {
+            self.scannerView = scannerView
+        }
+        
         func didFind(barcode: String) {
-            print(barcode)
+            self.scannerView.scannedBarcode = barcode
         }
         
         func didSurface(error: CameraError) {
@@ -37,5 +45,5 @@ struct ScannerView: UIViewControllerRepresentable {
 }
 
 #Preview {
-    ScannerView()
+    ScannerView(scannedBarcode: .constant("123456"))
 }
