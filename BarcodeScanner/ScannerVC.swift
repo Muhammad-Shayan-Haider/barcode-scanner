@@ -13,8 +13,7 @@ enum CameraError: String {
     case invalidScannedValue = "The value scanned is not valid. The app scans EAN-8 and EAN-13 barcodes."
 }
 
-// UIViewController talks to Coordinator and Coordinator
-// talks to SwiftUI View.
+
 
 protocol ScannerVCDelegate: AnyObject {
     func didFind(barcode: String)
@@ -31,6 +30,22 @@ final class ScannerVC: UIViewController {
         super.init(nibName: nil, bundle: nil)
         
         self.scannerDelegate = scannerDelegate
+    }
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        setupCaptureSession()
+    }
+    
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        
+        guard let previewLayer else {
+            scannerDelegate?.didSurface(error: .invalidDeviceInput)
+            return
+        }
+        previewLayer.frame = view.layer.bounds
     }
     
     required init?(coder: NSCoder) {
@@ -99,6 +114,7 @@ extension ScannerVC: AVCaptureMetadataOutputObjectsDelegate {
             return
         }
         
+        captureSession.stopRunning()
         scannerDelegate?.didFind(barcode: barcode)
     }
 }
